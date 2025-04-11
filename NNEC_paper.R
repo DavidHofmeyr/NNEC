@@ -1,8 +1,6 @@
 if(system.file(package = "FNN") == "") install.packages("FNN")
-if(system.file(package = "knn.covertree") == "") install.packages("knn.covertree")
 if(system.file(package = "Matrix") == "") install.packages("Matrix")
 library(FNN)
-library(knn.covertree)
 library(Matrix)
 
 
@@ -22,8 +20,11 @@ NNEC <- function(X, nn_opts = 5*2:5, lambda_opts = 1+0:10/5, itmax = 100, cycleL
   d <- ncol(X)
   
   ### find neighbours up to maximum nn
-  if(distance=='Euclidean') nns <- get.knn(X, max(nn_opts))
-  else if(distance=='cosine') nns <- list(nn.index = find_knn(X-matrix(colMeans(X), n, d, byrow = TRUE), max(nn_opts), distance = 'cosine')$index)
+  if(distance=='cosine'){
+    X <- X - matrix(colMeans(X), n, d, byrow = TRUE)
+    X <- X/sqrt(rowSums(X^2))
+  }
+  nns <- get.knn(X, max(nn_opts))
   
   best <- -Inf ## tracks the quality of the best solution found so far
   
